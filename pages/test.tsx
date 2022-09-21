@@ -6,11 +6,23 @@ const Home: NextPage = () => {
   return (
     <div>
       <Head>
-        <title>index</title>
-        <meta name="description" content="Index Page" />
+        <title>test</title>
+        <meta name="description" content="test Page" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div>[index]</div>
+
+      <hr />
+      <div>[test]</div>
+
+      <hr />
+      <Link href="/test/1">
+        <a>test/1</a>
+      </Link>
+
+      <hr />
+      <Link href="/test/2">
+        <a>test/2</a>
+      </Link>
 
       <hr />
       <Link href="/test">
