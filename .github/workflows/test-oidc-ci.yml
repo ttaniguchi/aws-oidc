@@ -8,8 +8,8 @@ env:
   AWS_REGION: "ap-northeast-1"
   BUCKET_NAME: "ttaniguchi-aws-oidc"
   ROLE_TO_ASSUME: "arn:aws:iam::402403143873:role/github-action-oidc"
-  ROLE_SESSION_NAME: "deploy_develop"
   CF_DISTRIBUTION: "EZ1N52VFINAQQ"
+  AWS_LAMBDA_FUNCTION_ARN: "arn:aws:lambda:us-east-1:402403143873:function:nextOriginRequest"
 permissions:
   id-token: write
   contents: read
@@ -36,7 +36,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ env.ROLE_TO_ASSUME }}
-          role-session-name: ${{ env.ROLE_SESSION_NAME }}
+          role-session-name: deploy_develop
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy
@@ -44,3 +44,18 @@ jobs:
         run: aws s3 sync --delete . s3://${{ env.BUCKET_NAME }}
       - name: Cleaning Cloudfront Cache
         run: aws cloudfront create-invalidation --distribution-id ${{ env.CF_DISTRIBUTION }} --paths "/*"
+
+  lambda:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
+          role-session-name: deploy_lambda_develop
+          aws-region: us-east-1
+
+      - name: Zipped
+        run: zip -j nextOriginRequest.zip ./lambda/nextOriginRequest/index.js
+      - name: Update function code
+        run: aws lambda update-function-code --function-name ${{ env.AWS_LAMBDA_FUNCTION_ARN }} --zip-file fileb://nextOriginRequest.zip --publish
